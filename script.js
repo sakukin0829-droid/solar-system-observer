@@ -1757,6 +1757,10 @@ function createMoonOrbitLine(radius) {
 function createMoonSystem(earthRecord, parentPivot, earthPlanet, options) {
   const moonDistance = options.distance || 2.4;
   const moonRadius = options.radius || 0.34;
+  const tidallyLocked = options.tidallyLocked !== false;
+  // This LROC map places the Moon's near side at the texture center. Rotate it
+  // toward Earth once, then keep that yaw fixed while the orbit pivot turns.
+  const surfaceYaw = options.surfaceYaw ?? Math.PI;
   const moonPivot = new THREE.Group();
   moonPivot.name = "月球绕地球公转轴";
   moonPivot.position.copy(earthPlanet.position);
@@ -1783,6 +1787,7 @@ function createMoonSystem(earthRecord, parentPivot, earthPlanet, options) {
   const moon = new THREE.Mesh(new THREE.SphereGeometry(moonRadius, 44, 28), moonMaterial);
   moon.name = "月球";
   moon.position.set(moonDistance, 0.16, 0);
+  moon.rotation.y = surfaceYaw;
   moon.renderOrder = 3;
   moon.userData.labelOffset = { offsetX: 38, offsetY: -28 };
   moonPivot.add(moon);
@@ -1801,11 +1806,13 @@ function createMoonSystem(earthRecord, parentPivot, earthPlanet, options) {
     pivot: moonPivot,
     parentRecord: earthRecord,
     orbit,
-    orbitSpeed: options.orbitSpeed || 0.046,
-    rotationSpeed: options.rotationSpeed || 0.028,
+    orbitSpeed: options.orbitSpeed ?? 0.046,
+    rotationSpeed: options.rotationSpeed ?? 0,
+    tidallyLocked,
+    surfaceYaw,
     order: "地球的天然卫星",
     type: "卫星",
-    feature: "月球围绕地球公转，我们在地球上能看到月相变化。",
+    feature: "月球被地球潮汐锁定：自转周期与公转周期相同，所以近地面始终朝向地球；背面不是永远黑暗的一面。",
     radius: moonRadius,
   };
   moon.userData.planetRecord = moonRecord;
@@ -2134,7 +2141,8 @@ function buildSolarSystem() {
         radius: 0.34,
         angle: -1.15,
         orbitSpeed: 0.072,
-        rotationSpeed: 0.035,
+        tidallyLocked: true,
+        surfaceYaw: Math.PI,
       },
       orbitSpeed: 0.01,
       rotationSpeed: 0.18,
@@ -2712,7 +2720,11 @@ function updateSolarSystem(delta) {
 
   moonRecords.forEach((record) => {
     record.pivot.rotation.y += delta * record.orbitSpeed * (orbitPaused ? 0 : Math.max(1, motionScale * 0.72));
-    record.mesh.rotation.y += delta * record.rotationSpeed;
+    if (record.tidallyLocked) {
+      record.mesh.rotation.y = record.surfaceYaw;
+    } else {
+      record.mesh.rotation.y += delta * record.rotationSpeed;
+    }
   });
 
   if (activeView === "follow" && selectedRecord?.mesh && !cameraTween && orbitControls) {
