@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>一掌建立太阳系：小学科学手势模型实验室</title>
+  <link rel="stylesheet" href="styles.css?v=observer4">
+</head>
+<body>
+  <main class="app" id="app" data-state="home3d">
+    <div class="webgl-shell" aria-hidden="true">
+      <canvas id="spaceCanvas"></canvas>
+    </div>
+    <div class="focus-glow" aria-hidden="true"></div>
+    <div class="screen-shade" aria-hidden="true"></div>
+    <div class="planet-label-layer" id="planetLabels" aria-hidden="true"></div>
+
+    <section class="home-shell page-layer" id="homePage" aria-labelledby="homeTitle">
+      <div class="home-content">
+        <p class="home-kicker">小学科学手势模型实验室</p>
+        <h1 id="homeTitle">一掌建立太阳系</h1>
+        <p class="home-subtitle">小学科学手势模型实验室</p>
+        <p class="cosmic-path">宇宙 → 银河系 → 太阳系 → 地球</p>
+        <p class="home-guide">从宇宙视角进入太阳系，认识八大行星的位置、大小、距离与分类。</p>
+        <button class="primary-action" id="enterSolarButton" type="button">进入太阳系</button>
+      </div>
+      <p class="source-note">部分宇宙与行星素材来源：NASA，仅用于小学科学教学展示。</p>
+    </section>
+
+    <section class="solar-shell page-layer" id="solarPage" aria-labelledby="solarTitle" aria-hidden="true">
+      <header class="solar-header">
+        <div>
+          <p class="section-kicker">第二层：太阳系</p>
+          <h2 id="solarTitle">太阳系观察器</h2>
+          <p class="solar-intro">拖拽旋转视角，滚轮缩放；点击行星靠近观察。</p>
+        </div>
+        <button class="secondary-action" id="backHomeButton" type="button">返回宇宙入口</button>
+      </header>
+
+      <nav class="observer-toolbar" aria-label="太阳系观察控制">
+        <div class="toolbar-group view-actions" aria-label="快捷视角">
+          <button type="button" data-view="top">俯瞰</button>
+          <button type="button" data-view="side">侧视</button>
+          <button type="button" data-view="oblique" class="is-active">斜侧</button>
+          <button type="button" data-view="follow">跟随行星</button>
+          <button type="button" data-view="overview">返回全景</button>
+        </div>
+        <div class="toolbar-group toggle-actions" aria-label="显示与运动控制">
+          <label><input id="orbitToggle" type="checkbox" checked>轨道</label>
+          <label><input id="labelToggle" type="checkbox" checked>标签</label>
+          <label class="select-control">
+            <span>比例</span>
+            <select id="scaleModeSelect">
+              <option value="teaching" selected>教学比例</option>
+              <option value="real">真实比例参考</option>
+            </select>
+          </label>
+          <div class="speed-control" role="group" aria-label="公转速度">
+            <span>公转速度</span>
+            <div class="speed-options">
+              <button type="button" data-orbit-speed="1">1×</button>
+              <button type="button" data-orbit-speed="2">2×</button>
+              <button type="button" data-orbit-speed="4" class="is-active" aria-pressed="true">4×</button>
+              <button type="button" data-orbit-speed="8">8×</button>
+              <button type="button" data-orbit-speed="16">16×</button>
+            </div>
+          </div>
+          <button type="button" id="orbitPauseButton">暂停公转</button>
+        </div>
+      </nav>
+
+      <aside class="planet-info-card" id="planetInfoCard" aria-live="polite" hidden>
+        <p class="planet-info-kicker" id="planetInfoOrder">太阳系观察</p>
+        <h3 id="planetInfoName">选择一颗行星</h3>
+        <p id="planetInfoType">点击任意行星，镜头会靠近并显示简洁信息。</p>
+        <p id="planetInfoFeature"></p>
+      </aside>
+
+      <aside class="mode-panel" aria-label="后续学习模式占位区">
+        <p class="mode-panel-title">后续学习模式</p>
+        <div class="mode-actions">
+          <button type="button" data-mode="planet">认识行星</button>
+          <button type="button" data-mode="distance">距离模型</button>
+          <button type="button" data-mode="size">大小比较</button>
+          <button type="button" data-mode="category">行星分类</button>
+        </div>
+        <p class="mode-status" id="modeStatus" role="status">模式按钮已预留，后续继续接入学习内容。</p>
+      </aside>
+
+      <p class="model-note">本页面为教学模型，行星大小与距离将在后续模式中分别展示，当前画面不代表完整真实比例。</p>
+    </section>
+  </main>
+
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/CopyShader.js"></script>
+  <script src="vendor/LuminosityHighPassShader.js"></script>
+  <script src="vendor/EffectComposer.js"></script>
+  <script src="vendor/RenderPass.js"></script>
+  <script src="vendor/ShaderPass.js"></script>
+  <script src="vendor/UnrealBloomPass.js"></script>
+  <script src="vendor/orbit-controls-lite.js"></script>
+  <script src="script.js?v=observer5g"></script>
+</body>
+</html>

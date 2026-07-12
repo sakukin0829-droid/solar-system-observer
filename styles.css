@@ -1,0 +1,634 @@
+:root {
+  --text: #f7fbff;
+  --muted: #b8c8db;
+  --soft: rgba(237, 246, 255, 0.82);
+  --panel: rgba(6, 12, 23, 0.62);
+  --panel-strong: rgba(7, 14, 27, 0.78);
+  --line: rgba(221, 238, 255, 0.2);
+  --accent: #f6c46b;
+  --accent-cool: #76d8e8;
+  font-family: "Microsoft YaHei", "PingFang SC", "Segoe UI", Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: #030711;
+  color: var(--text);
+}
+
+body {
+  overflow: hidden;
+}
+
+button {
+  font: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+.app {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.webgl-shell,
+.screen-shade,
+.focus-glow,
+.planet-label-layer {
+  position: fixed;
+  inset: 0;
+}
+
+.webgl-shell {
+  z-index: -4;
+  background:
+    radial-gradient(circle at 52% 48%, rgba(28, 53, 82, 0.45), rgba(3, 7, 17, 0.9) 58%, #02050d 100%);
+}
+
+.webgl-unavailable .webgl-shell {
+  background-image:
+    linear-gradient(90deg, rgba(2, 7, 15, 0.84), rgba(4, 10, 20, 0.38) 46%, rgba(2, 7, 15, 0.84)),
+    linear-gradient(180deg, rgba(1, 5, 12, 0.35), rgba(1, 5, 12, 0.78)),
+    url("assets/universe-bg.jpg"),
+    radial-gradient(circle at 52% 48%, rgba(28, 53, 82, 0.45), rgba(3, 7, 17, 0.9) 58%, #02050d 100%);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+#spaceCanvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.screen-shade {
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0.08) 0, rgba(0, 0, 0, 0.22) 45%, rgba(0, 0, 0, 0.62) 100%),
+    linear-gradient(90deg, rgba(0, 0, 0, 0.46), rgba(0, 0, 0, 0.1) 45%, rgba(0, 0, 0, 0.46));
+  opacity: 0.9;
+  transition: opacity 900ms ease;
+}
+
+.focus-glow {
+  z-index: -1;
+  pointer-events: none;
+  background:
+    radial-gradient(circle, rgba(255, 235, 180, 0.68) 0, rgba(120, 210, 235, 0.22) 18%, rgba(23, 40, 64, 0.05) 42%, transparent 64%);
+  opacity: 0;
+  transform: scale(0.35);
+  filter: blur(8px);
+  transition:
+    opacity 1300ms ease,
+    transform 2600ms cubic-bezier(0.18, 0.78, 0.18, 1),
+    filter 2600ms ease;
+}
+
+.planet-label-layer {
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 600ms ease;
+}
+
+.planet-label {
+  position: absolute;
+  min-width: max-content;
+  padding: 0.24rem 0.56rem;
+  border: 1px solid rgba(237, 246, 255, 0.36);
+  border-radius: 999px;
+  background: rgba(3, 8, 18, 0.84);
+  color: #f7fbff;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.25;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
+  transform: translate(-50%, -50%);
+  will-change: transform, opacity;
+}
+
+.planet-label.is-sun {
+  border-color: rgba(255, 216, 126, 0.42);
+  color: #fff0bd;
+  font-weight: 700;
+}
+
+.page-layer {
+  position: absolute;
+  inset: 0;
+  min-height: 100vh;
+  transition:
+    opacity 760ms ease,
+    transform 900ms ease,
+    visibility 0ms linear 760ms;
+}
+
+.home-shell {
+  display: grid;
+  place-items: center;
+  padding: 3rem 1.25rem 4.5rem;
+  text-align: center;
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.home-content {
+  width: min(860px, 100%);
+  transform: translateY(-12vh);
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+.home-kicker,
+.section-kicker {
+  margin-bottom: 0.75rem;
+  color: var(--accent-cool);
+  font-size: 0.95rem;
+  letter-spacing: 0;
+}
+
+h1 {
+  margin-bottom: 0.85rem;
+  font-size: 4.2rem;
+  line-height: 1.08;
+  letter-spacing: 0;
+  text-shadow:
+    0 0 24px rgba(108, 201, 245, 0.26),
+    0 4px 26px rgba(0, 0, 0, 0.76);
+}
+
+.home-subtitle {
+  margin-bottom: 1.4rem;
+  color: #dce9f8;
+  font-size: 1.35rem;
+}
+
+.cosmic-path {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2.9rem;
+  margin-bottom: 1.35rem;
+  padding: 0.65rem 1.15rem;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(6, 13, 26, 0.56);
+  color: #eef7ff;
+  font-size: 1.08rem;
+  box-shadow: 0 14px 42px rgba(0, 0, 0, 0.26);
+}
+
+.home-guide {
+  max-width: 720px;
+  margin: 0 auto 2rem;
+  color: var(--soft);
+  font-size: 1.12rem;
+  line-height: 1.8;
+}
+
+.primary-action,
+.secondary-action,
+.mode-actions button,
+.observer-toolbar button,
+.planet-info-card button {
+  min-height: 2.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  border-radius: 999px;
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.primary-action {
+  padding: 0.85rem 1.8rem;
+  border-color: rgba(255, 220, 140, 0.76);
+  background: linear-gradient(135deg, rgba(238, 184, 78, 0.98), rgba(176, 94, 54, 0.94));
+  color: #120d05;
+  font-weight: 700;
+  box-shadow: 0 18px 42px rgba(214, 138, 48, 0.24);
+}
+
+.primary-action:hover,
+.secondary-action:hover,
+.mode-actions button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(255, 255, 255, 0.56);
+}
+
+.primary-action:disabled {
+  cursor: default;
+  transform: none;
+  opacity: 0.72;
+}
+
+.primary-action:focus-visible,
+.secondary-action:focus-visible,
+.mode-actions button:focus-visible {
+  outline: 3px solid rgba(118, 216, 232, 0.72);
+  outline-offset: 3px;
+}
+
+.source-note {
+  position: absolute;
+  left: 1.25rem;
+  right: 1.25rem;
+  bottom: 1.1rem;
+  margin: 0;
+  color: rgba(230, 239, 250, 0.76);
+  font-size: 0.86rem;
+}
+
+.solar-shell {
+  display: block;
+  padding: 1.25rem 1.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(18px);
+  pointer-events: none;
+}
+
+.solar-header {
+  position: absolute;
+  top: 1.25rem;
+  left: 1.5rem;
+  right: 1.5rem;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1.5rem;
+  pointer-events: auto;
+}
+
+.solar-header h2 {
+  margin-bottom: 0.28rem;
+  font-size: 1.65rem;
+  line-height: 1.16;
+  letter-spacing: 0;
+  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.75);
+}
+
+.solar-intro {
+  margin-bottom: 0;
+  color: var(--soft);
+  font-size: 0.92rem;
+  line-height: 1.7;
+}
+
+.secondary-action {
+  flex: 0 0 auto;
+  padding: 0.65rem 1rem;
+  background: rgba(7, 16, 30, 0.62);
+}
+
+.observer-toolbar {
+  position: absolute;
+  left: 1.5rem;
+  bottom: 4.2rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  max-width: min(980px, calc(100vw - 3rem));
+  pointer-events: auto;
+}
+
+.toolbar-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.46rem;
+  border: 1px solid rgba(218, 236, 255, 0.16);
+  border-radius: 0.5rem;
+  background: rgba(3, 8, 18, 0.58);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 14px 38px rgba(0, 0, 0, 0.22);
+}
+
+.observer-toolbar button {
+  min-height: 2.1rem;
+  padding: 0.38rem 0.68rem;
+  border-radius: 0.42rem;
+  background: rgba(12, 28, 50, 0.72);
+  font-size: 0.82rem;
+}
+
+.observer-toolbar button.is-active,
+.observer-toolbar button[aria-pressed="true"] {
+  border-color: rgba(118, 216, 232, 0.62);
+  background: rgba(32, 76, 103, 0.74);
+  color: #eaffff;
+}
+
+.toggle-actions label,
+.select-control,
+.speed-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  min-height: 2.1rem;
+  color: rgba(239, 248, 255, 0.9);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.toggle-actions input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  accent-color: var(--accent-cool);
+}
+
+.select-control select {
+  min-height: 2rem;
+  border: 1px solid rgba(221, 238, 255, 0.2);
+  border-radius: 0.35rem;
+  background: rgba(5, 14, 28, 0.88);
+  color: var(--text);
+}
+
+.speed-options {
+  display: inline-flex;
+  gap: 0.2rem;
+}
+
+.observer-toolbar .speed-options button {
+  min-width: 2.25rem;
+  min-height: 1.85rem;
+  padding: 0.24rem 0.42rem;
+  border-color: rgba(221, 238, 255, 0.14);
+  font-variant-numeric: tabular-nums;
+}
+
+.observer-toolbar .speed-options button.is-active {
+  border-color: rgba(126, 234, 255, 0.7);
+  background: rgba(41, 103, 126, 0.86);
+  box-shadow: inset 0 0 0 1px rgba(178, 242, 255, 0.12);
+}
+
+.planet-info-card {
+  position: absolute;
+  left: 1.5rem;
+  top: 7.2rem;
+  width: min(19rem, calc(100vw - 3rem));
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(218, 236, 255, 0.18);
+  border-radius: 0.5rem;
+  background: rgba(3, 8, 18, 0.64);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(14px);
+  pointer-events: auto;
+}
+
+.planet-info-card h3 {
+  margin: 0 0 0.45rem;
+  font-size: 1.32rem;
+  line-height: 1.2;
+}
+
+.planet-info-card p {
+  margin-bottom: 0.42rem;
+  color: rgba(228, 239, 250, 0.86);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.planet-info-kicker {
+  color: var(--accent-cool) !important;
+  font-size: 0.78rem !important;
+}
+
+.mode-panel {
+  position: absolute;
+  right: 1.5rem;
+  bottom: 4.2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.72rem;
+  width: 13.5rem;
+  padding: 0.85rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 0.5rem;
+  background: rgba(4, 10, 20, 0.48);
+  backdrop-filter: blur(12px);
+  pointer-events: auto;
+}
+
+.mode-panel-title {
+  margin-bottom: 0;
+  color: #eef6ff;
+  font-weight: 700;
+}
+
+.mode-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.mode-actions button {
+  width: 100%;
+  min-height: 2.1rem;
+  padding: 0.42rem 0.55rem;
+  background: rgba(9, 21, 39, 0.72);
+  font-size: 0.78rem;
+}
+
+.mode-status {
+  min-height: 2.4rem;
+  margin-bottom: 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+
+.model-note {
+  position: absolute;
+  left: 50%;
+  bottom: 1rem;
+  width: min(760px, calc(100vw - 3rem));
+  margin: 0;
+  padding: 0.48rem 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(236, 244, 255, 0.82);
+  font-size: 0.78rem;
+  line-height: 1.6;
+  text-align: center;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.app[data-state="transitionToSolar"] .home-shell {
+  opacity: 0;
+  transform: translateY(-0.85rem);
+  pointer-events: none;
+}
+
+.app[data-state="transitionToSolar"] .focus-glow {
+  opacity: 1;
+  transform: scale(1.2);
+  filter: blur(3px);
+}
+
+.app[data-state="transitionToSolar"] .screen-shade {
+  opacity: 0.96;
+}
+
+.app[data-state="solar3d"] .home-shell {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-0.85rem);
+  pointer-events: none;
+}
+
+.app[data-state="solar3d"] .solar-shell {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: none;
+  transition-delay: 140ms, 140ms, 0ms;
+}
+
+.app[data-state="solar3d"] .planet-label-layer {
+  opacity: 1;
+}
+
+.app[data-state="solar3d"] .screen-shade {
+  opacity: 0.55;
+}
+
+.app[data-labels-visible="false"] .planet-label-layer {
+  opacity: 0;
+}
+
+@media (max-width: 900px) {
+  .app {
+    min-height: 100svh;
+  }
+
+  h1 {
+    font-size: 3rem;
+  }
+
+  .solar-shell {
+    padding: 1rem;
+  }
+
+  .solar-header {
+    left: 1rem;
+    right: 1rem;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .observer-toolbar {
+    left: 1rem;
+    right: 1rem;
+    bottom: 6.1rem;
+    max-width: none;
+  }
+
+  .mode-panel {
+    right: 1rem;
+    bottom: 1rem;
+    width: min(21rem, calc(100vw - 2rem));
+  }
+
+  .planet-info-card {
+    left: 1rem;
+    top: 9.4rem;
+    width: min(19rem, calc(100vw - 2rem));
+  }
+
+  .model-note {
+    display: none;
+  }
+}
+
+@media (max-width: 560px) {
+  .home-shell {
+    padding-inline: 1rem;
+  }
+
+  h1 {
+    font-size: 2.35rem;
+  }
+
+  .home-subtitle {
+    font-size: 1.1rem;
+  }
+
+  .cosmic-path {
+    display: flex;
+    width: 100%;
+    padding-inline: 0.8rem;
+    font-size: 0.96rem;
+  }
+
+  .home-guide {
+    font-size: 1rem;
+  }
+
+  .solar-header h2 {
+    font-size: 1.85rem;
+  }
+
+  .observer-toolbar {
+    bottom: 8.2rem;
+  }
+
+  .toolbar-group {
+    width: 100%;
+  }
+
+  .view-actions {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .observer-toolbar button {
+    padding-inline: 0.35rem;
+    font-size: 0.72rem;
+  }
+
+  .toggle-actions {
+    align-items: flex-start;
+  }
+
+  .planet-label {
+    font-size: 0.7rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .screen-shade,
+  .focus-glow,
+  .planet-label-layer,
+  .page-layer,
+  .primary-action,
+  .secondary-action,
+  .mode-actions button {
+    transition-duration: 1ms;
+  }
+}
