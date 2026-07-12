@@ -28,6 +28,28 @@ const STATE_TRANSITION = "transitionToSolar";
 const STATE_SOLAR = "solar3d";
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const transitionDuration = prefersReducedMotion.matches ? 120 : 3800;
+const ASTRONOMICAL_SCALE = Object.freeze({
+  astronomicalUnitKm: 149_597_870.7,
+  earthDiameterKm: 12_756,
+  teachingEarthRadius: 0.38,
+  orbitUnitsPerAu: 12.1,
+});
+
+function teachingRadiusFromDiameter(diameterKm) {
+  return (diameterKm / ASTRONOMICAL_SCALE.earthDiameterKm) * ASTRONOMICAL_SCALE.teachingEarthRadius;
+}
+
+function trueRadiusFromDiameter(diameterKm) {
+  return (diameterKm / 2 / ASTRONOMICAL_SCALE.astronomicalUnitKm) * ASTRONOMICAL_SCALE.orbitUnitsPerAu;
+}
+
+function orbitDistanceFromAu(au) {
+  return au * ASTRONOMICAL_SCALE.orbitUnitsPerAu;
+}
+
+function orbitDistanceFromKm(distanceKm) {
+  return (distanceKm / ASTRONOMICAL_SCALE.astronomicalUnitKm) * ASTRONOMICAL_SCALE.orbitUnitsPerAu;
+}
 
 let currentState = STATE_HOME;
 let transition = null;
@@ -59,7 +81,7 @@ try {
   console.error("无法创建 WebGL 上下文，Three.js 3D 场景未启动。", error);
 }
 
-const camera = new THREE.PerspectiveCamera(72, 1, 0.1, 1400);
+const camera = new THREE.PerspectiveCamera(72, 1, 0.1, 2400);
 const cameraTarget = new THREE.Vector3();
 const homeCamera = {
   position: new THREE.Vector3(0, 6, 78),
@@ -72,30 +94,30 @@ const galaxyCamera = {
   fov: 78,
 };
 const solarCamera = {
-  position: new THREE.Vector3(-24, 10, 58),
+  position: new THREE.Vector3(-30, 13, 90),
   target: new THREE.Vector3(0, -1.2, 0),
-  fov: 54,
+  fov: 56,
 };
 const solarViewPresets = {
   oblique: {
-    position: new THREE.Vector3(-24, 10, 58),
+    position: new THREE.Vector3(-30, 13, 90),
     target: new THREE.Vector3(0, -1.2, 0),
-    fov: 54,
+    fov: 56,
   },
   top: {
-    position: new THREE.Vector3(0, 76, 0.1),
+    position: new THREE.Vector3(0, 100, 0.1),
     target: new THREE.Vector3(0, 0, 0),
     fov: 50,
   },
   side: {
-    position: new THREE.Vector3(-48, 5.4, 15),
+    position: new THREE.Vector3(-72, 8, 26),
     target: new THREE.Vector3(0, -0.8, 0),
-    fov: 48,
+    fov: 50,
   },
   overview: {
-    position: new THREE.Vector3(-35, 16, 78),
+    position: new THREE.Vector3(-240, 160, 960),
     target: new THREE.Vector3(0, -1.8, 0),
-    fov: 58,
+    fov: 64,
   },
 };
 
@@ -130,6 +152,7 @@ let solarParticleBelt = null;
 let milkyWayGroup = null;
 let orbitControls = null;
 let selectedRecord = null;
+let solarSunRecord = null;
 let activeView = "oblique";
 let scaleMode = "teaching";
 let showOrbits = true;
@@ -218,48 +241,48 @@ function updateCameraPresets() {
   if (isPhone) {
     solarGroup.position.set(0, -1.2, 0);
     solarGroup.scale.setScalar(0.74);
-    solarViewPresets.oblique.position.set(-18, 10, 86);
+    solarViewPresets.oblique.position.set(-24, 12, 106);
     solarViewPresets.oblique.target.set(0, -1.4, 0);
     solarViewPresets.oblique.fov = 62;
-    solarViewPresets.top.position.set(0, 96, 0.1);
+    solarViewPresets.top.position.set(0, 116, 0.1);
     solarViewPresets.top.target.set(0, 0, 0);
     solarViewPresets.top.fov = 58;
-    solarViewPresets.side.position.set(-76, 6.5, 22);
+    solarViewPresets.side.position.set(-86, 9, 30);
     solarViewPresets.side.target.set(0, -1, 0);
     solarViewPresets.side.fov = 58;
-    solarViewPresets.overview.position.set(-28, 18, 102);
+    solarViewPresets.overview.position.set(-260, 170, 1120);
     solarViewPresets.overview.target.set(0, -1.8, 0);
-    solarViewPresets.overview.fov = 66;
+    solarViewPresets.overview.fov = 70;
   } else if (isTablet) {
     solarGroup.position.set(0, -1.7, 0);
     solarGroup.scale.setScalar(0.94);
-    solarViewPresets.oblique.position.set(-22, 11, 74);
+    solarViewPresets.oblique.position.set(-28, 13, 96);
     solarViewPresets.oblique.target.set(0, -1.3, 0);
     solarViewPresets.oblique.fov = 58;
-    solarViewPresets.top.position.set(0, 86, 0.1);
+    solarViewPresets.top.position.set(0, 106, 0.1);
     solarViewPresets.top.target.set(0, 0, 0);
     solarViewPresets.top.fov = 54;
-    solarViewPresets.side.position.set(-62, 6, 18);
+    solarViewPresets.side.position.set(-78, 8, 28);
     solarViewPresets.side.target.set(0, -1, 0);
     solarViewPresets.side.fov = 54;
-    solarViewPresets.overview.position.set(-32, 17, 90);
+    solarViewPresets.overview.position.set(-250, 160, 1000);
     solarViewPresets.overview.target.set(0, -1.8, 0);
-    solarViewPresets.overview.fov = 62;
+    solarViewPresets.overview.fov = 66;
   } else {
     solarGroup.position.set(0, -2, 0);
     solarGroup.scale.setScalar(1.06);
-    solarViewPresets.oblique.position.set(-24, 10, 58);
+    solarViewPresets.oblique.position.set(-30, 13, 90);
     solarViewPresets.oblique.target.set(0, -1.2, 0);
-    solarViewPresets.oblique.fov = 54;
-    solarViewPresets.top.position.set(0, 76, 0.1);
+    solarViewPresets.oblique.fov = 56;
+    solarViewPresets.top.position.set(0, 100, 0.1);
     solarViewPresets.top.target.set(0, 0, 0);
     solarViewPresets.top.fov = 50;
-    solarViewPresets.side.position.set(-48, 5.4, 15);
+    solarViewPresets.side.position.set(-72, 8, 26);
     solarViewPresets.side.target.set(0, -0.8, 0);
-    solarViewPresets.side.fov = 48;
-    solarViewPresets.overview.position.set(-35, 16, 78);
+    solarViewPresets.side.fov = 50;
+    solarViewPresets.overview.position.set(-240, 160, 960);
     solarViewPresets.overview.target.set(0, -1.8, 0);
-    solarViewPresets.overview.fov = 58;
+    solarViewPresets.overview.fov = 64;
   }
   solarCamera.position.copy(solarViewPresets.oblique.position);
   solarCamera.target.copy(solarViewPresets.oblique.target);
@@ -296,7 +319,7 @@ function initialiseCameraControls() {
   orbitControls.enabled = false;
   orbitControls.target.copy(cameraTarget);
   orbitControls.minDistance = 7;
-  orbitControls.maxDistance = 160;
+  orbitControls.maxDistance = 1200;
   orbitControls.minPolarAngle = 0.08;
   orbitControls.maxPolarAngle = Math.PI - 0.08;
   orbitControls.enableDamping = true;
@@ -1553,10 +1576,10 @@ function createSolarParticleBelt() {
 
   for (let i = 0; i < count; i += 1) {
     const index = i * 3;
-    const x = THREE.MathUtils.randFloat(-42, 44);
-    const z = THREE.MathUtils.randFloat(-9, 13) + Math.sin(x * 0.08) * 3.4;
+    const x = THREE.MathUtils.randFloat(-420, 440);
+    const z = THREE.MathUtils.randFloat(-126, 138) + Math.sin(x * 0.018) * 17;
     positions[index] = x;
-    positions[index + 1] = THREE.MathUtils.randFloat(-1.4, 1.3);
+    positions[index + 1] = THREE.MathUtils.randFloat(-5.8, 5.4);
     positions[index + 2] = z;
 
     const color = (Math.random() < 0.58 ? colorA : colorB).clone().lerp(colorC, Math.random() * 0.2);
@@ -1601,7 +1624,9 @@ function createGlowSprite(name, scale, colors, opacity) {
 }
 
 function createSun() {
-  const geometry = new THREE.SphereGeometry(4.4, 56, 36);
+  const teachingRadius = 4.4;
+  const realRadius = trueRadiusFromDiameter(1_392_700);
+  const geometry = new THREE.SphereGeometry(teachingRadius, 56, 36);
   const material = new THREE.MeshBasicMaterial({
     map: createSunSurfaceTexture(),
     color: 0xffffff,
@@ -1649,8 +1674,15 @@ function createSun() {
     order: "中心天体",
     type: "恒星",
     feature: "太阳自己发光发热，是太阳系中质量最大的天体，八大行星都围绕它公转。",
-    radius: 4.4,
+    radius: teachingRadius,
+    teachingRadius,
+    realRadius,
+    glowSprites: [
+      { sprite: innerGlow, teachingScale: 20 },
+      { sprite: outerGlow, teachingScale: 36 },
+    ],
   };
+  solarSunRecord = sunRecord;
   sun.userData.planetRecord = sunRecord;
   selectableRecords.push(sunRecord);
   createProjectedLabel("太阳", sun, { offsetX: 0, offsetY: -60, className: "is-sun" });
@@ -1755,8 +1787,12 @@ function createMoonOrbitLine(radius) {
 }
 
 function createMoonSystem(earthRecord, parentPivot, earthPlanet, options) {
-  const moonDistance = options.distance || 2.4;
-  const moonRadius = options.radius || 0.34;
+  const teachingDistance = options.teachingDistance ?? options.distance ?? 2.4;
+  const realDistance = options.realDistance ?? teachingDistance;
+  const teachingRadius = options.teachingRadius ?? options.radius ?? 0.34;
+  const realRadius = options.realRadius ?? teachingRadius;
+  const moonDistance = teachingDistance;
+  const moonRadius = teachingRadius;
   const tidallyLocked = options.tidallyLocked !== false;
   // This LROC map places the Moon's near side at the texture center. Rotate it
   // toward Earth once, then keep that yaw fixed while the orbit pivot turns.
@@ -1772,6 +1808,9 @@ function createMoonSystem(earthRecord, parentPivot, earthPlanet, options) {
   orbitRecords.push({
     object: orbit,
     isMoonOrbit: true,
+    teachingDistance,
+    realDistance,
+    currentDistance: teachingDistance,
   });
 
   const moonMaterial = rememberOpacity(new THREE.MeshStandardMaterial({
@@ -1813,7 +1852,12 @@ function createMoonSystem(earthRecord, parentPivot, earthPlanet, options) {
     order: "地球的天然卫星",
     type: "卫星",
     feature: "月球被地球潮汐锁定：自转周期与公转周期相同，所以近地面始终朝向地球；背面不是永远黑暗的一面。",
-    radius: moonRadius,
+    distance: teachingDistance,
+    teachingDistance,
+    realDistance,
+    radius: teachingRadius,
+    teachingRadius,
+    realRadius,
   };
   moon.userData.planetRecord = moonRecord;
   moonRecords.push(moonRecord);
@@ -2062,10 +2106,12 @@ function buildSolarSystem() {
   const planetConfigs = [
     {
       name: "水星",
-      distance: 6.8,
-      realDistance: 6.2,
-      radius: 0.42,
-      realRadius: 0.24,
+      distance: orbitDistanceFromAu(0.387),
+      realDistance: orbitDistanceFromAu(0.387),
+      radius: teachingRadiusFromDiameter(4_880),
+      realRadius: trueRadiusFromDiameter(4_880),
+      diameterKm: 4_880,
+      semiMajorAxisAu: 0.387,
       angle: -0.58,
       color: 0xb9b4aa,
       texture: createMercurySurfaceTexture(),
@@ -2079,10 +2125,12 @@ function buildSolarSystem() {
     },
     {
       name: "金星",
-      distance: 9.4,
-      realDistance: 8.2,
-      radius: 0.66,
-      realRadius: 0.58,
+      distance: orbitDistanceFromAu(0.723),
+      realDistance: orbitDistanceFromAu(0.723),
+      radius: teachingRadiusFromDiameter(12_104),
+      realRadius: trueRadiusFromDiameter(12_104),
+      diameterKm: 12_104,
+      semiMajorAxisAu: 0.723,
       angle: -1.02,
       color: 0xd5aa6f,
       texturePath: planetTexturePaths.venus,
@@ -2108,10 +2156,12 @@ function buildSolarSystem() {
     },
     {
       name: "地球",
-      distance: 12.1,
-      realDistance: 10.4,
-      radius: 0.72,
-      realRadius: 0.62,
+      distance: orbitDistanceFromAu(1),
+      realDistance: orbitDistanceFromAu(1),
+      radius: teachingRadiusFromDiameter(12_756),
+      realRadius: trueRadiusFromDiameter(12_756),
+      diameterKm: 12_756,
+      semiMajorAxisAu: 1,
       angle: -0.42,
       color: 0x2b75c2,
       texturePath: planetTexturePaths.earth,
@@ -2137,8 +2187,10 @@ function buildSolarSystem() {
         intensity: 2.05,
       },
       moon: {
-        distance: 2.4,
-        radius: 0.34,
+        teachingDistance: 3.1,
+        realDistance: orbitDistanceFromKm(384_400),
+        teachingRadius: teachingRadiusFromDiameter(3_475),
+        realRadius: trueRadiusFromDiameter(3_475),
         angle: -1.15,
         orbitSpeed: 0.072,
         tidallyLocked: true,
@@ -2153,10 +2205,12 @@ function buildSolarSystem() {
     },
     {
       name: "火星",
-      distance: 14.8,
-      realDistance: 13.7,
-      radius: 0.52,
-      realRadius: 0.34,
+      distance: orbitDistanceFromAu(1.524),
+      realDistance: orbitDistanceFromAu(1.524),
+      radius: teachingRadiusFromDiameter(6_792),
+      realRadius: trueRadiusFromDiameter(6_792),
+      diameterKm: 6_792,
+      semiMajorAxisAu: 1.524,
       angle: -1.58,
       color: 0xc16d47,
       texturePath: planetTexturePaths.mars,
@@ -2170,10 +2224,12 @@ function buildSolarSystem() {
     },
     {
       name: "木星",
-      distance: 20.2,
-      realDistance: 22.5,
-      radius: 1.62,
-      realRadius: 1.9,
+      distance: orbitDistanceFromAu(5.203),
+      realDistance: orbitDistanceFromAu(5.203),
+      radius: teachingRadiusFromDiameter(142_984),
+      realRadius: trueRadiusFromDiameter(142_984),
+      diameterKm: 142_984,
+      semiMajorAxisAu: 5.203,
       angle: 0.42,
       color: 0xc59a72,
       texturePath: planetTexturePaths.jupiter,
@@ -2193,10 +2249,12 @@ function buildSolarSystem() {
     },
     {
       name: "土星",
-      distance: 25.7,
-      realDistance: 30.2,
-      radius: 1.28,
-      realRadius: 1.58,
+      distance: orbitDistanceFromAu(9.537),
+      realDistance: orbitDistanceFromAu(9.537),
+      radius: teachingRadiusFromDiameter(120_536),
+      realRadius: trueRadiusFromDiameter(120_536),
+      diameterKm: 120_536,
+      semiMajorAxisAu: 9.537,
       angle: 2.92,
       color: 0xd4bc82,
       texture: createSaturnBodyTexture(),
@@ -2216,10 +2274,12 @@ function buildSolarSystem() {
     },
     {
       name: "天王星",
-      distance: 27.6,
-      realDistance: 38.4,
-      radius: 0.96,
-      realRadius: 0.86,
+      distance: orbitDistanceFromAu(19.191),
+      realDistance: orbitDistanceFromAu(19.191),
+      radius: teachingRadiusFromDiameter(51_118),
+      realRadius: trueRadiusFromDiameter(51_118),
+      diameterKm: 51_118,
+      semiMajorAxisAu: 19.191,
       angle: 2.25,
       color: 0x88d9d6,
       texture: createUranusAtmosphereTexture(),
@@ -2240,10 +2300,12 @@ function buildSolarSystem() {
     },
     {
       name: "海王星",
-      distance: 32.2,
-      realDistance: 47.8,
-      radius: 0.98,
-      realRadius: 0.84,
+      distance: orbitDistanceFromAu(30.07),
+      realDistance: orbitDistanceFromAu(30.07),
+      radius: teachingRadiusFromDiameter(49_528),
+      realRadius: trueRadiusFromDiameter(49_528),
+      diameterKm: 49_528,
+      semiMajorAxisAu: 30.07,
       angle: 2.65,
       color: 0x3769d4,
       texture: createNeptuneAtmosphereTexture(),
@@ -2301,6 +2363,7 @@ function applyScaleMode(nextMode) {
     const radius = scaleMode === "real" ? record.realRadius : record.teachingRadius;
     const distanceScale = distance / record.teachingDistance;
     record.distance = distance;
+    record.radius = radius;
     record.mesh.position.x = distance;
     record.mesh.scale.setScalar(radius / record.teachingRadius);
     if (record.moonSystem) {
@@ -2312,9 +2375,33 @@ function applyScaleMode(nextMode) {
     }
   });
 
+  moonRecords.forEach((record) => {
+    const distance = scaleMode === "real" ? record.realDistance : record.teachingDistance;
+    const radius = scaleMode === "real" ? record.realRadius : record.teachingRadius;
+    const distanceScale = distance / record.teachingDistance;
+    record.distance = distance;
+    record.radius = radius;
+    record.mesh.position.x = distance;
+    record.mesh.scale.setScalar(radius / record.teachingRadius);
+    if (record.orbit) {
+      record.orbit.scale.set(distanceScale, 1, distanceScale);
+      record.orbit.visible = showOrbits;
+    }
+  });
+
+  if (solarSunRecord) {
+    const radius = scaleMode === "real" ? solarSunRecord.realRadius : solarSunRecord.teachingRadius;
+    const scale = radius / solarSunRecord.teachingRadius;
+    solarSunRecord.radius = radius;
+    solarSunRecord.mesh.scale.setScalar(scale);
+    solarSunRecord.glowSprites.forEach(({ sprite, teachingScale }) => {
+      sprite.scale.set(teachingScale * scale, teachingScale * scale, 1);
+    });
+  }
+
   modeStatus.textContent = scaleMode === "real"
-    ? "已切换为真实比例参考：距离和大小差异更明显，但仍保留课堂可见性。"
-    : "已切换为教学比例：便于同时观察八大行星。";
+    ? "已切换为统一真实比例：天体大小与轨道距离共用同一刻度，全景中的行星会接近点状，这符合真实宇宙尺度。"
+    : "已切换为教学比例：八大行星和月球按真实直径关系显示，太阳到行星的轨道半径按 AU 比例排列。";
 
   if (selectedRecord) {
     window.setTimeout(() => focusPlanetRecord(selectedRecord), 80);
