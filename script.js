@@ -30,14 +30,8 @@ const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)
 const transitionDuration = prefersReducedMotion.matches ? 120 : 3800;
 const ASTRONOMICAL_SCALE = Object.freeze({
   astronomicalUnitKm: 149_597_870.7,
-  earthDiameterKm: 12_756,
-  teachingEarthRadius: 0.38,
   orbitUnitsPerAu: 12.1,
 });
-
-function teachingRadiusFromDiameter(diameterKm) {
-  return (diameterKm / ASTRONOMICAL_SCALE.earthDiameterKm) * ASTRONOMICAL_SCALE.teachingEarthRadius;
-}
 
 function trueRadiusFromDiameter(diameterKm) {
   return (diameterKm / 2 / ASTRONOMICAL_SCALE.astronomicalUnitKm) * ASTRONOMICAL_SCALE.orbitUnitsPerAu;
@@ -81,7 +75,7 @@ try {
   console.error("无法创建 WebGL 上下文，Three.js 3D 场景未启动。", error);
 }
 
-const camera = new THREE.PerspectiveCamera(72, 1, 0.1, 2400);
+const camera = new THREE.PerspectiveCamera(72, 1, 0.1, 1400);
 const cameraTarget = new THREE.Vector3();
 const homeCamera = {
   position: new THREE.Vector3(0, 6, 78),
@@ -94,30 +88,30 @@ const galaxyCamera = {
   fov: 78,
 };
 const solarCamera = {
-  position: new THREE.Vector3(-30, 13, 90),
+  position: new THREE.Vector3(-24, 10, 58),
   target: new THREE.Vector3(0, -1.2, 0),
-  fov: 56,
+  fov: 54,
 };
 const solarViewPresets = {
   oblique: {
-    position: new THREE.Vector3(-30, 13, 90),
+    position: new THREE.Vector3(-24, 10, 58),
     target: new THREE.Vector3(0, -1.2, 0),
-    fov: 56,
+    fov: 54,
   },
   top: {
-    position: new THREE.Vector3(0, 100, 0.1),
+    position: new THREE.Vector3(0, 76, 0.1),
     target: new THREE.Vector3(0, 0, 0),
     fov: 50,
   },
   side: {
-    position: new THREE.Vector3(-72, 8, 26),
+    position: new THREE.Vector3(-48, 5.4, 15),
     target: new THREE.Vector3(0, -0.8, 0),
-    fov: 50,
+    fov: 48,
   },
   overview: {
-    position: new THREE.Vector3(-240, 160, 960),
-    target: new THREE.Vector3(0, -1.8, 0),
-    fov: 64,
+    position: new THREE.Vector3(-35, 16, 78),
+    target: new THREE.Vector3(0, -1.6, 0),
+    fov: 58,
   },
 };
 
@@ -241,48 +235,48 @@ function updateCameraPresets() {
   if (isPhone) {
     solarGroup.position.set(0, -1.2, 0);
     solarGroup.scale.setScalar(0.74);
-    solarViewPresets.oblique.position.set(-24, 12, 106);
+    solarViewPresets.oblique.position.set(-18, 10, 86);
     solarViewPresets.oblique.target.set(0, -1.4, 0);
     solarViewPresets.oblique.fov = 62;
-    solarViewPresets.top.position.set(0, 116, 0.1);
+    solarViewPresets.top.position.set(0, 96, 0.1);
     solarViewPresets.top.target.set(0, 0, 0);
     solarViewPresets.top.fov = 58;
-    solarViewPresets.side.position.set(-86, 9, 30);
+    solarViewPresets.side.position.set(-76, 6.5, 22);
     solarViewPresets.side.target.set(0, -1, 0);
     solarViewPresets.side.fov = 58;
-    solarViewPresets.overview.position.set(-260, 170, 1120);
+    solarViewPresets.overview.position.set(-28, 18, 102);
     solarViewPresets.overview.target.set(0, -1.8, 0);
-    solarViewPresets.overview.fov = 70;
+    solarViewPresets.overview.fov = 66;
   } else if (isTablet) {
     solarGroup.position.set(0, -1.7, 0);
     solarGroup.scale.setScalar(0.94);
-    solarViewPresets.oblique.position.set(-28, 13, 96);
+    solarViewPresets.oblique.position.set(-22, 11, 74);
     solarViewPresets.oblique.target.set(0, -1.3, 0);
     solarViewPresets.oblique.fov = 58;
-    solarViewPresets.top.position.set(0, 106, 0.1);
+    solarViewPresets.top.position.set(0, 86, 0.1);
     solarViewPresets.top.target.set(0, 0, 0);
     solarViewPresets.top.fov = 54;
-    solarViewPresets.side.position.set(-78, 8, 28);
+    solarViewPresets.side.position.set(-62, 6, 18);
     solarViewPresets.side.target.set(0, -1, 0);
     solarViewPresets.side.fov = 54;
-    solarViewPresets.overview.position.set(-250, 160, 1000);
+    solarViewPresets.overview.position.set(-32, 17, 90);
     solarViewPresets.overview.target.set(0, -1.8, 0);
-    solarViewPresets.overview.fov = 66;
+    solarViewPresets.overview.fov = 62;
   } else {
     solarGroup.position.set(0, -2, 0);
     solarGroup.scale.setScalar(1.06);
-    solarViewPresets.oblique.position.set(-30, 13, 90);
+    solarViewPresets.oblique.position.set(-24, 10, 58);
     solarViewPresets.oblique.target.set(0, -1.2, 0);
-    solarViewPresets.oblique.fov = 56;
-    solarViewPresets.top.position.set(0, 100, 0.1);
+    solarViewPresets.oblique.fov = 54;
+    solarViewPresets.top.position.set(0, 76, 0.1);
     solarViewPresets.top.target.set(0, 0, 0);
     solarViewPresets.top.fov = 50;
-    solarViewPresets.side.position.set(-72, 8, 26);
+    solarViewPresets.side.position.set(-48, 5.4, 15);
     solarViewPresets.side.target.set(0, -0.8, 0);
-    solarViewPresets.side.fov = 50;
-    solarViewPresets.overview.position.set(-240, 160, 960);
-    solarViewPresets.overview.target.set(0, -1.8, 0);
-    solarViewPresets.overview.fov = 64;
+    solarViewPresets.side.fov = 48;
+    solarViewPresets.overview.position.set(-35, 16, 78);
+    solarViewPresets.overview.target.set(0, -1.6, 0);
+    solarViewPresets.overview.fov = 58;
   }
   solarCamera.position.copy(solarViewPresets.oblique.position);
   solarCamera.target.copy(solarViewPresets.oblique.target);
@@ -319,7 +313,7 @@ function initialiseCameraControls() {
   orbitControls.enabled = false;
   orbitControls.target.copy(cameraTarget);
   orbitControls.minDistance = 7;
-  orbitControls.maxDistance = 1200;
+  orbitControls.maxDistance = 160;
   orbitControls.minPolarAngle = 0.08;
   orbitControls.maxPolarAngle = Math.PI - 0.08;
   orbitControls.enableDamping = true;
@@ -1576,10 +1570,10 @@ function createSolarParticleBelt() {
 
   for (let i = 0; i < count; i += 1) {
     const index = i * 3;
-    const x = THREE.MathUtils.randFloat(-420, 440);
-    const z = THREE.MathUtils.randFloat(-126, 138) + Math.sin(x * 0.018) * 17;
+    const x = THREE.MathUtils.randFloat(-42, 44);
+    const z = THREE.MathUtils.randFloat(-9, 13) + Math.sin(x * 0.08) * 3.4;
     positions[index] = x;
-    positions[index + 1] = THREE.MathUtils.randFloat(-5.8, 5.4);
+    positions[index + 1] = THREE.MathUtils.randFloat(-1.4, 1.3);
     positions[index + 2] = z;
 
     const color = (Math.random() < 0.58 ? colorA : colorB).clone().lerp(colorC, Math.random() * 0.2);
@@ -2106,9 +2100,9 @@ function buildSolarSystem() {
   const planetConfigs = [
     {
       name: "水星",
-      distance: orbitDistanceFromAu(0.387),
+      distance: 6.8,
       realDistance: orbitDistanceFromAu(0.387),
-      radius: teachingRadiusFromDiameter(4_880),
+      radius: 0.30,
       realRadius: trueRadiusFromDiameter(4_880),
       diameterKm: 4_880,
       semiMajorAxisAu: 0.387,
@@ -2125,9 +2119,9 @@ function buildSolarSystem() {
     },
     {
       name: "金星",
-      distance: orbitDistanceFromAu(0.723),
+      distance: 9.4,
       realDistance: orbitDistanceFromAu(0.723),
-      radius: teachingRadiusFromDiameter(12_104),
+      radius: 0.68,
       realRadius: trueRadiusFromDiameter(12_104),
       diameterKm: 12_104,
       semiMajorAxisAu: 0.723,
@@ -2156,9 +2150,9 @@ function buildSolarSystem() {
     },
     {
       name: "地球",
-      distance: orbitDistanceFromAu(1),
+      distance: 12.1,
       realDistance: orbitDistanceFromAu(1),
-      radius: teachingRadiusFromDiameter(12_756),
+      radius: 0.72,
       realRadius: trueRadiusFromDiameter(12_756),
       diameterKm: 12_756,
       semiMajorAxisAu: 1,
@@ -2187,9 +2181,9 @@ function buildSolarSystem() {
         intensity: 2.05,
       },
       moon: {
-        teachingDistance: 3.1,
+        teachingDistance: 1.65,
         realDistance: orbitDistanceFromKm(384_400),
-        teachingRadius: teachingRadiusFromDiameter(3_475),
+        teachingRadius: 0.20,
         realRadius: trueRadiusFromDiameter(3_475),
         angle: -1.15,
         orbitSpeed: 0.072,
@@ -2205,9 +2199,9 @@ function buildSolarSystem() {
     },
     {
       name: "火星",
-      distance: orbitDistanceFromAu(1.524),
+      distance: 14.8,
       realDistance: orbitDistanceFromAu(1.524),
-      radius: teachingRadiusFromDiameter(6_792),
+      radius: 0.40,
       realRadius: trueRadiusFromDiameter(6_792),
       diameterKm: 6_792,
       semiMajorAxisAu: 1.524,
@@ -2224,9 +2218,9 @@ function buildSolarSystem() {
     },
     {
       name: "木星",
-      distance: orbitDistanceFromAu(5.203),
+      distance: 20.2,
       realDistance: orbitDistanceFromAu(5.203),
-      radius: teachingRadiusFromDiameter(142_984),
+      radius: 2.2,
       realRadius: trueRadiusFromDiameter(142_984),
       diameterKm: 142_984,
       semiMajorAxisAu: 5.203,
@@ -2249,9 +2243,9 @@ function buildSolarSystem() {
     },
     {
       name: "土星",
-      distance: orbitDistanceFromAu(9.537),
+      distance: 25.7,
       realDistance: orbitDistanceFromAu(9.537),
-      radius: teachingRadiusFromDiameter(120_536),
+      radius: 1.8,
       realRadius: trueRadiusFromDiameter(120_536),
       diameterKm: 120_536,
       semiMajorAxisAu: 9.537,
@@ -2274,9 +2268,9 @@ function buildSolarSystem() {
     },
     {
       name: "天王星",
-      distance: orbitDistanceFromAu(19.191),
+      distance: 28.8,
       realDistance: orbitDistanceFromAu(19.191),
-      radius: teachingRadiusFromDiameter(51_118),
+      radius: 0.98,
       realRadius: trueRadiusFromDiameter(51_118),
       diameterKm: 51_118,
       semiMajorAxisAu: 19.191,
@@ -2300,9 +2294,9 @@ function buildSolarSystem() {
     },
     {
       name: "海王星",
-      distance: orbitDistanceFromAu(30.07),
+      distance: 32.2,
       realDistance: orbitDistanceFromAu(30.07),
-      radius: teachingRadiusFromDiameter(49_528),
+      radius: 0.95,
       realRadius: trueRadiusFromDiameter(49_528),
       diameterKm: 49_528,
       semiMajorAxisAu: 30.07,
@@ -2401,7 +2395,7 @@ function applyScaleMode(nextMode) {
 
   modeStatus.textContent = scaleMode === "real"
     ? "已切换为统一真实比例：天体大小与轨道距离共用同一刻度，全景中的行星会接近点状，这符合真实宇宙尺度。"
-    : "已切换为教学比例：八大行星和月球按真实直径关系显示，太阳到行星的轨道半径按 AU 比例排列。";
+    : "已切换为教学观察比例：保留行星顺序、内行星与月球的相对大小关系，并压缩外行星距离，确保八大行星能够在同一课堂画面中清晰观察。";
 
   if (selectedRecord) {
     window.setTimeout(() => focusPlanetRecord(selectedRecord), 80);
