@@ -52,7 +52,7 @@
             <span>比例</span>
             <select id="scaleModeSelect">
               <option value="teaching" selected>教学比例</option>
-              <option value="real">真实比例参考</option>
+              <option value="real">统一真实比例</option>
             </select>
           </label>
           <div class="speed-control" role="group" aria-label="公转速度">
@@ -87,7 +87,7 @@
         <p class="mode-status" id="modeStatus" role="status">模式按钮已预留，后续继续接入学习内容。</p>
       </aside>
 
-      <p class="model-note">本页面为教学模型，行星大小与距离将在后续模式中分别展示，当前画面不代表完整真实比例。</p>
+      <p class="model-note">教学比例中，行星直径与日心轨道半径分别按真实比例计算；“统一真实比例”会让大小与距离共用同一刻度，因此行星在全景中会接近点状。</p>
     </section>
   </main>
 
@@ -99,6 +99,6 @@
   <script src="vendor/ShaderPass.js"></script>
   <script src="vendor/UnrealBloomPass.js"></script>
   <script src="vendor/orbit-controls-lite.js"></script>
-  <script src="script.js?v=moon-lock1"></script>
+  <script src="script.js?v=proportion-scale1"></script>
 </body>
 </html>
