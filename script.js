@@ -1760,6 +1760,43 @@ function createAtmosphereGlow(planet, radius, atmosphereConfig) {
   return atmosphere;
 }
 
+function createTeachingAxis(planet, radius, axisConfig = {}) {
+  const axis = new THREE.Group();
+  axis.name = `${planet.name}-地轴`;
+
+  const lineRadius = radius * (axisConfig.thickness || 0.035);
+  const innerEdge = radius * 0.9;
+  const outerEdge = radius * (axisConfig.length || 1.72);
+  const extensionLength = outerEdge - innerEdge;
+  const axisMaterial = rememberOpacity(new THREE.MeshBasicMaterial({
+    color: axisConfig.color || 0xaee6ff,
+    transparent: true,
+    opacity: axisConfig.opacity ?? 0.88,
+    depthWrite: false,
+  }), axisConfig.opacity ?? 0.88);
+
+  [-1, 1].forEach((direction) => {
+    const extension = new THREE.Mesh(
+      new THREE.CylinderGeometry(lineRadius, lineRadius, extensionLength, 12),
+      axisMaterial,
+    );
+    extension.name = direction > 0 ? "地轴北端" : "地轴南端";
+    extension.position.y = direction * (innerEdge + extensionLength / 2);
+    axis.add(extension);
+
+    const endCap = new THREE.Mesh(
+      new THREE.SphereGeometry(lineRadius * 1.42, 16, 10),
+      axisMaterial,
+    );
+    endCap.name = direction > 0 ? "地轴北极端点" : "地轴南极端点";
+    endCap.position.y = direction * outerEdge;
+    axis.add(endCap);
+  });
+
+  planet.add(axis);
+  return axis;
+}
+
 function createMoonOrbitLine(radius) {
   const points = [];
   const segments = 128;
@@ -2043,6 +2080,10 @@ function createPlanet(config) {
     shells.push(createAtmosphereGlow(planet, config.radius, config.atmosphere));
   }
 
+  const teachingAxis = config.axis
+    ? createTeachingAxis(planet, config.radius, config.axis)
+    : null;
+
   if (config.name === "土星") {
     shells.push(createSaturnRingSystem(planet, config.radius));
   }
@@ -2068,6 +2109,7 @@ function createPlanet(config) {
     type: config.type,
     feature: config.feature,
     shells,
+    teachingAxis,
   };
   planet.userData.planetRecord = record;
   planetRecords.push(record);
@@ -2180,6 +2222,12 @@ function buildSolarSystem() {
         power: 3.15,
         intensity: 2.05,
       },
+      axis: {
+        color: 0xaee6ff,
+        opacity: 0.88,
+        thickness: 0.035,
+        length: 1.72,
+      },
       moon: {
         teachingDistance: 1.65,
         realDistance: orbitDistanceFromKm(384_400),
@@ -2194,7 +2242,7 @@ function buildSolarSystem() {
       rotationSpeed: 0.18,
       order: "第 3 颗行星",
       type: "类地行星",
-      feature: "地球有液态水、空气和生命，是我们生活的家园。",
+      feature: "地球有液态水、空气和生命，是我们生活的家园。地轴相对公转轨道的垂线倾斜约 23.4°，这是四季形成的重要原因。",
       labelOffset: { offsetX: 26, offsetY: 16 },
     },
     {
